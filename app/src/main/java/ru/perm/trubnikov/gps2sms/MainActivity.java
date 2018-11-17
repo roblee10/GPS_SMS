@@ -2,6 +2,7 @@ package ru.perm.trubnikov.gps2sms;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -84,6 +85,7 @@ public class MainActivity extends BaseActivity {
     ImageButton btnSave;
     ImageButton btnFav;
     EditText plainPh;
+    String Pnum;
     Button enableGPSBtn;
     TextView GPSstate;
     Menu mMenu;
@@ -520,6 +522,7 @@ public class MainActivity extends BaseActivity {
 
         // Plain phone number
         plainPh = (EditText) findViewById(R.id.editText1);
+        Pnum = plainPh.getText().toString();
         plainPh.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String lPhone = ((EditText) v).getText().toString().replace("-", "")
@@ -687,14 +690,28 @@ public class MainActivity extends BaseActivity {
             mThreadSendSMS.setPhone(phoneToSendSMS);
             mThreadSendSMS.setState(ThreadSendSMS.STATE_RUNNING);
             mThreadSendSMS.start();
-        }
 
+        }
     }
+
+    public void sendSMS2(){
+        String ssms=" [잃어버린 분실물 위치 정보 입니다] ";
+        SmsManager smsManager2 = SmsManager.getDefault();
+        PendingIntent sentPI;
+        String SENT = "SMS_SENT";
+
+        sentPI = PendingIntent.getBroadcast(this,0,new Intent(SENT),0);
+
+        smsManager2.sendTextMessage(plainPh.getText().toString().replace("-", "")
+                .replace(" ", "").replace("(", "").replace(")", "").replace(".", ""),null,ssms,sentPI,null);
+    }
+
 
     public void initiateSMSSend(View v) {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         sendSMS(GpsHelper.getLinkByProvType(sharedPrefs.getString("prefSMSContent", "2"), coordsToSend));
-    }
+        sendSMS2();
+}
 
     protected void ShowSendButton() {
         sendpbtn.setVisibility(View.VISIBLE);
@@ -716,27 +733,5 @@ public class MainActivity extends BaseActivity {
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
     }
-
-
-	/*
-     * TODO
-	 *
-	 * Автоматическая отправка координат через интервалы времени
-	 * Функционал "найти мой телефон" по СМС
-	 *
-	 * Виджет
-	 * Программа не видит координаты в смс, пример: клевое место N56°04,1747' E61°21,8289'
-	 * В настройках в СМС добавить все типы координат
-	 * Показывать все типы координат на главном экране?
-	 */
-
-    /*
-    * v3.4.9
-    * Запрос прав доступа во время выполнения для Android 6+
-    * Пересобрано с использованием обновленного инструментария
-    * Изменен значок хранилища координат
-    * В окне, подтверждающем отправку СМС, теперь отображается текст отосланной СМС и кнопка перехода в приложение, управляющее СМСками
-    * Конвертирование координат (отдельная опция меню)
-    * */
 
 }
